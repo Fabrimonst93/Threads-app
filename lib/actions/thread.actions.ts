@@ -1,0 +1,146 @@
+"use server"
+
+import Thread from "../models/thread.model"
+import { connectToDB } from "../mongoose"
+import User from "../models/user.model"
+import { revalidatePath } from "next/cache"
+import Page from '../../app/(auth)/onboarding/page';
+import path from "path"
+import { auth } from "@clerk/nextjs/server"
+
+interface Params {
+    text: string
+    author: string
+    communityId: string | null
+    path: string
+}
+
+export async function createThread({ text, author, communityId, path }: Params) {
+    try {
+        connectToDB()
+    
+        const localUser = await User.findOne({ clerkId: author });
+        
+        if (!localUser) throw new Error("Local user not found")
+        
+            const createThread = await Thread.create({
+            text,
+            author: localUser._id,
+            communityId: null,
+            path
+        })
+    
+        // update user model
+        await User.findByIdAndUpdate(localUser._id, {
+            $push: { postsQuery: createThread._id }
+        })
+    
+        revalidatePath(path)
+    } catch (error) {
+        throw Error(error as string)
+    }
+}
+
+export async function fetchPosts(PageNumber: number = 1, PageSize: number = 20) {
+    connectToDB()
+    try {
+
+        const skipAmount = (PageNumber - 1) * PageSize
+
+        const postsQuery = await Thread
+        .find({parentId: { $in: [null, undefined]}})
+        .sort({createdAt: "desc"})
+        .skip(skipAmount)
+        .limit(PageSize)
+        .populate({path: "author", model: User})
+        .populate({path: "children",
+            populate: {
+                path: "author",
+                model: User,
+                select: "_id name parentedId image"
+        }})
+
+        const totalPosts = await Thread.countDocuments({parentId: { $in: [null, undefined]}})
+
+        const posts = postsQuery
+
+        const isNext = totalPosts > skipAmount + posts.length
+
+        return {posts, isNext}
+        
+    } catch (error) {
+        throw Error(error as string)
+    }
+}
+
+export async function fetchThreadById(id: string) {
+    connectToDB()
+    
+    try {
+        const thread = await Thread.findById(id).populate({
+            path: "author",
+            model: User,
+            select: "_id id name image"
+        })
+        .populate({
+            path: "children",
+            populate: [
+                {
+                    path: "author",
+                    model: User,
+                    select: "_id id name parentId image"
+                },
+                {
+                    path: "children",
+                    model: Thread,
+                    populate: {
+                        path: "author",
+                        model: User,
+                        select: "_id id name parentId image"
+                    }
+                }
+            ]
+        })
+        
+        return thread
+        
+    } catch (error) {
+        throw Error(error as string)
+    }
+}
+
+export async function createComment(
+    threadId: string,
+    commentText: string,
+    userId: string, // This is the Clerk user id
+    path: string
+) {
+    connectToDB()
+    console.log("Comentario creado exitosamente1")
+    
+    try {
+        // Find the local user by Clerk ID
+        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") });
+        if (!localUser) throw new Error("Local user not found");
+
+        const originalThread = await Thread.findById(threadId)
+        if (!originalThread) throw new Error("Post original no encontrado")
+
+        const commentThread = new Thread({
+            text: commentText,
+            author: localUser._id, // Use the local user's ObjectId
+            parentId: threadId,
+        })
+        
+        const savedComment = await commentThread.save()
+        
+        originalThread.children.push(savedComment._id)
+        await originalThread.save()
+        console.log("Comentario creado exitosamente")
+
+        revalidatePath(path)
+    }
+    catch (error: any) {
+        throw new Error(`Error al crear comentario: ${error.message}`)
+    }
+}
