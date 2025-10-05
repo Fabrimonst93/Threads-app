@@ -32,6 +32,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
                     communityId={thread.communityId}
                     createdAt={thread.createdAt}
                     comments={thread.children}
+                    likes={thread.likes}
                     />
             </div>
 
@@ -55,6 +56,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
                         communityId={childItem.communityId}
                         createdAt={childItem.createdAt}
                         comments={childItem.children}
+                        likes={childItem.likes}
                         isComment
                     />
                 ))}
