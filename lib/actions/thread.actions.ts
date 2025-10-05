@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache"
 import Page from '../../app/(auth)/onboarding/page';
 import path from "path"
 import { auth } from "@clerk/nextjs/server"
+import { likePostAdd, LikePostDelete } from "./user.actions"
 
 interface Params {
     text: string
@@ -24,11 +25,11 @@ export async function createThread({ text, author, communityId, path }: Params) 
         if (!localUser) throw new Error("Local user not found")
         
             const createThread = await Thread.create({
-            text,
-            author: localUser._id,
-            communityId: null,
-            path
-        })
+                text,
+                author: localUser._id,
+                communityId: null,
+                path
+            })
     
         // update user model
         await User.findByIdAndUpdate(localUser._id, {
@@ -116,7 +117,6 @@ export async function createComment(
     path: string
 ) {
     connectToDB()
-    console.log("Comentario creado exitosamente1")
     
     try {
         // Find the local user by Clerk ID
@@ -136,9 +136,56 @@ export async function createComment(
         
         originalThread.children.push(savedComment._id)
         await originalThread.save()
-        console.log("Comentario creado exitosamente")
 
         revalidatePath(path)
+    }
+    catch (error: any) {
+        throw new Error(`Error al crear comentario: ${error.message}`)
+    }
+}
+
+export async function likePost(
+    threadId: string,
+    userId: string
+) {
+    connectToDB()
+
+    try {
+        // Find the local user by Clerk ID
+        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") });
+        if (!localUser) throw new Error("Local user not found");
+
+
+        const thread = await Thread.findById(threadId)
+        if (!thread) throw new Error("Post original no encontrado")
+
+        likePostAdd(userId, threadId)
+        thread.likes.push(userId)
+        await thread.save()
+        console.log("Comentario likeado exitosamente")
+
+    }
+    catch (error: any) {
+        throw new Error(`Error al crear comentario: ${error.message}`)
+    }
+}
+
+export async function unlikePost(
+    threadId: string,
+    userId: string
+){
+    connectToDB()
+
+    try {
+        // Find the local user by Clerk ID
+        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") });
+        if (!localUser) throw new Error("Local user not found");
+
+        const thread = await Thread.findById(threadId)
+        if (!thread) throw new Error("Post original no encontrado") 
+        thread.likes = thread.likes.filter((like: { toString: () => any }) => like.toString() !== userId.toString())
+        LikePostDelete(userId, threadId)
+        await thread.save()
     }
     catch (error: any) {
         throw new Error(`Error al crear comentario: ${error.message}`)

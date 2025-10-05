@@ -6,6 +6,7 @@ export default async function Home(){
   const result = await fetchPosts(1, 30)
   const user = await currentUser();
   
+  
   return (
     <>
       <h1 className="head-text text-left"/>
@@ -25,6 +26,7 @@ export default async function Home(){
                 communityId={post.communityId}
                 comments={post.children}
                 createdAt={post.createdAt}
+                likes={post.likes}
                 >
                 <h2>{post.text}</h2>
                 <p>Author: {post.author.name}</p>

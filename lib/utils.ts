@@ -41,3 +41,7 @@ export function formatThreadCount(count: number): string {
     return `${threadCount} ${threadWord}`;
   }
 }
+
+export const checkIsLiked = (postId: string, likeList: string[], userId?: string) => {
+  return likeList.includes(userId ?? "");
+}

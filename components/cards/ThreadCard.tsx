@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import PostStats from '../shared/PostStats'
 
 interface props {
     id: string
@@ -24,8 +25,11 @@ interface props {
     }[]
     createdAt: string
     isComment?: boolean
+    likes: string[]
     children?: React.ReactNode
 }
+
+
 const ThreadCard = ({
     id,
     currentUserId,
@@ -35,9 +39,11 @@ const ThreadCard = ({
     communityId,
     comments,
     createdAt,
-    isComment
+    isComment,
+    likes
 } : props
 ) => {
+
   return (
     <article className={`flex w-full flex-col rounded-xl ${isComment ? "px-0 xs:px-7" : "bg-dark-2 m-4 mr-10 p-7"
       }`}>
@@ -67,24 +73,8 @@ const ThreadCard = ({
                         {content}
                     </p>
                     <div className={`${isComment && "mb-10 "}mt-5 flex flex-col gap-3`}>
-                        <div className='flex gap-3.5'>
-                            <Image
-                                className='curspr-pointer object-contain'
-                                src= "/heart-gray.svg"
-                                alt='Like'
-                                width={24}
-                                height={24}
-                            ></Image>
-                            <Link href={`/thread/${id}`} className='flex items-center gap-1'>
-                                <Image
-                                    className='curspr-pointer object-contain'
-                                    src= "/reply.svg"
-                                    alt='Like'
-                                    width={24}
-                                    height={24}
-                                ></Image>
-                            </Link>
-                        </div>
+
+                        <PostStats id={id.toString()} likes={likes} userId={currentUserId} comments={comments.length}/>
 
                         {isComment && comments.length > 0 &&(
                             <Link

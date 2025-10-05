@@ -161,3 +161,37 @@ export async function getActivity(userId: string) {
     throw error
   }
 }
+
+
+export async function likePostAdd(userId: string, postId: string) {
+  try {
+    connectToDB()
+    const user = await User.findOne({ id: userId })
+    if (!user) throw new Error("Usuario no encontrado")
+
+    user.likes = user.likes || []
+    user.likes.push(postId)
+
+    await user.save()
+    console.log("Post likeado exitosamente")
+
+  } catch (error) {
+    console.error("Error al dar like: ", error)
+    throw error
+  }
+}
+
+export async function LikePostDelete(userId: string, postId: string) {
+  try {
+    connectToDB()
+    const user = await User.findOne({ id: userId })
+    if (!user) throw new Error("Usuario no encontrado")
+
+    user.likes = user.likes.filter((like: string) => like !== postId)
+    await user.save()
+
+  } catch (error) {
+    console.error("Error al quitar like: ", error)
+    throw error
+  }
+}

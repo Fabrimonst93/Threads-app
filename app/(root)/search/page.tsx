@@ -9,8 +9,10 @@ import React from 'react'
 async function page({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
+  const params = await searchParams;
+
   const user = await currentUser();
   if (!user) return null;
 
@@ -19,8 +21,8 @@ async function page({
 
   const result = await fetchUsers({
     userId: user.id,
-    searchString: searchParams.q,
-    pageNumber: searchParams?.page ? +searchParams.page : 1,
+    searchString: params.q,
+    pageNumber: params?.page ? + params.page : 1,
     pageSize: 25,
   });
 
@@ -50,7 +52,7 @@ async function page({
 
       <Pagination
         path='search'
-        pageNumber={searchParams?.page ? +searchParams.page : 1}
+        pageNumber={params?.page ? +params.page : 1}
         isNext={result.isNext}
       />
     </section>
