@@ -31,6 +31,7 @@ const ThreadsTab = async ({currentUserId, accountId, accountType}: Props) => {
                     communityId={thread.community?.id}
                     comments={thread.children}
                     createdAt={thread.createdAt}
+                    likes={thread.likes}
                 ></ThreadCard>
             ))}
         </section>
