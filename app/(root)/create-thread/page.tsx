@@ -17,7 +17,7 @@ async function Page() {
             <h1 className="head-text text-heading2-bold font-bold">
                 Crear Post
             </h1>
-            <PostThread userId={userInfo._id}/>
+            <PostThread/>
         </div>
     )
 }
