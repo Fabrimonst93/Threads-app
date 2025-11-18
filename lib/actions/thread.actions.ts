@@ -8,6 +8,8 @@ import Page from '../../app/(auth)/onboarding/page';
 import path from "path"
 import { auth } from "@clerk/nextjs/server"
 import { likePostAdd, LikePostDelete } from "./user.actions"
+import Community from "../models/community.model"
+
 
 interface Params {
     text: string
@@ -16,29 +18,36 @@ interface Params {
     path: string
 }
 
-export async function createThread({ text, author, communityId, path }: Params) {
+
+    export async function createThread({ text, author, communityId, path }: Params
+    ) {
     try {
-        connectToDB()
-    
-        const localUser = await User.findOne({ clerkId: author });
-        
-        if (!localUser) throw new Error("Local user not found")
-        
-            const createThread = await Thread.create({
-                text,
-                author: localUser._id,
-                communityId: null,
-                path
-            })
-    
-        // update user model
-        await User.findByIdAndUpdate(localUser._id, {
-            $push: { postsQuery: createThread._id }
-        })
-    
-        revalidatePath(path)
-    } catch (error) {
-        throw Error(error as string)
+        connectToDB();
+
+        const communityIdObject = await Community.findOne(
+        { id: communityId },
+        { _id: 1 }
+        );
+
+        const createdThread = await Thread.create({
+        text,
+        author,
+        community: communityIdObject,
+        });
+
+        await User.findByIdAndUpdate(author, {
+            $push: { threads: createdThread._id },
+        });
+
+        if (communityIdObject) {
+            await Community.findByIdAndUpdate(communityIdObject, {
+                $push: { threads: createdThread._id },
+            });
+        }
+
+        revalidatePath(path);
+    } catch (error: any) {
+        throw new Error(`Failed to create thread: ${error.message}`);
     }
 }
 
@@ -54,6 +63,7 @@ export async function fetchPosts(PageNumber: number = 1, PageSize: number = 20) 
         .skip(skipAmount)
         .limit(PageSize)
         .populate({path: "author", model: User})
+        .populate({path: "communityId", model: "Community"})
         .populate({path: "children",
             populate: {
                 path: "author",
@@ -78,10 +88,16 @@ export async function fetchThreadById(id: string) {
     connectToDB()
     
     try {
-        const thread = await Thread.findById(id).populate({
+        const thread = await Thread.findById(id)
+        .populate({
             path: "author",
             model: User,
             select: "_id id name image"
+        })
+        .populate({
+            path: "community",
+            model: Community,
+            select: "_id id name image",
         })
         .populate({
             path: "children",

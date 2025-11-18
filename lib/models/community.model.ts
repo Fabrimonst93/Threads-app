@@ -32,9 +32,8 @@ const communitySchema = new mongoose.Schema({
       ref: "User",
     },
   ],
-})
+});
 
-const Community =
-  mongoose.models.Community || mongoose.model("Community", communitySchema)
+const Community = mongoose.models.Community || mongoose.model("Community", communitySchema)
 
 export default Community

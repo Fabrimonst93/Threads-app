@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import PostStats from '../shared/PostStats'
+import Community from '@/lib/models/community.model'
+import { formatDateString } from '@/lib/utils'
 
 interface props {
     id: string
@@ -13,7 +15,7 @@ interface props {
         image: string
         id: string
     }
-    communityId: {
+    community: {
         id: string
         name: string
         image: string
@@ -36,7 +38,7 @@ const ThreadCard = ({
     parentId,
     content,
     author,
-    communityId,
+    community,
     comments,
     createdAt,
     isComment,
@@ -60,7 +62,7 @@ const ThreadCard = ({
                             className='rounded-full cursor-pointer'
                         />
                     </Link>
-                    <div className='thread-card_bar'></div>
+                    <div className={comments && 'thread-card_bar'}></div>
                 </div>
                 <div className=''>
                     <Link
@@ -89,6 +91,29 @@ const ThreadCard = ({
                     </div>
                 </div>
             </div>
+
+            { /*TDOD: Delete thread*/}
+            { /*TDOD: Delete thread*/}
+
+            {isComment && community && (
+                <Link 
+                    href={`/community/${(community.id)}`}
+                    className='mt-6 flex items center'
+                >
+                    <p className='text-subtle-medium text-gray-1'>
+                        { formatDateString(createdAt) }
+                         - {` Comunidad: ${community.name}`}
+                    </p>
+                    <Image
+                        src={community.image}
+                        alt='Community-name'
+                        width={14}
+                        height={14}
+                        className='ml-1 rounded-full object-cover'
+                    ></Image>
+                </Link>
+                )
+            }
         </div>
     </article>
   )

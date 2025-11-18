@@ -43,15 +43,16 @@ const PostThread = () => {
 
 
   const onSubmit = async (values: z.infer<typeof threadValidation>) => {
+
     if (!userId) {
       console.error("User not authenticated")
       return
     }
-    
-    await createThread({
+
+      await createThread({
       text: values.thread,
       author: userId,
-      communityId: null,
+      communityId: organization? organization.id : null,
       path: pathname,
     })
 
