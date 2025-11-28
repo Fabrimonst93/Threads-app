@@ -19,36 +19,33 @@ interface Params {
 }
 
 
-    export async function createThread({ text, author, communityId, path }: Params
-    ) {
-    try {
-        connectToDB();
+export async function createThread({ text, author, communityId, path }: Params) {
+  try {
+    connectToDB()
 
-        const communityIdObject = await Community.findOne(
-        { id: communityId },
-        { _id: 1 }
-        );
+    // Find the local user by Clerk ID
+    const localUser = await User.findOne({ clerkId: author })
+    if (!localUser) throw new Error("Local user not found")
 
-        const createdThread = await Thread.create({
-        text,
-        author,
-        community: communityIdObject,
-        });
+    const communityIdObject = await Community.findOne(
+      { id: communityId },
+      { _id: 1 }
+    )
 
-        await User.findByIdAndUpdate(author, {
-            $push: { threads: createdThread._id },
-        });
+    const createdThread = await Thread.create({
+      text,
+      author: localUser._id, // Use the local user's ObjectId, not Clerk ID
+      community: communityIdObject,
+    })
 
-        if (communityIdObject) {
-            await Community.findByIdAndUpdate(communityIdObject, {
-                $push: { threads: createdThread._id },
-            });
-        }
+    await User.findByIdAndUpdate(localUser._id, {
+      $push: { threads: createdThread._id }
+    })
 
-        revalidatePath(path);
-    } catch (error: any) {
-        throw new Error(`Failed to create thread: ${error.message}`);
-    }
+    revalidatePath(path)
+  } catch (error: any) {
+    throw new Error(`Failed to create thread: ${error.message}`)
+  }
 }
 
 export async function fetchPosts(PageNumber: number = 1, PageSize: number = 20) {
@@ -63,7 +60,7 @@ export async function fetchPosts(PageNumber: number = 1, PageSize: number = 20) 
         .skip(skipAmount)
         .limit(PageSize)
         .populate({path: "author", model: User})
-        .populate({path: "communityId", model: "Community"})
+        .populate({path: "community", model: Community})
         .populate({path: "children",
             populate: {
                 path: "author",

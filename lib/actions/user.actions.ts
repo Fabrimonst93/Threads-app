@@ -54,13 +54,26 @@ export async function updateUser({
 
 
 export async function fetchUser(userId: string) {
-    try{
-        connectToDB()
-        return await User.findOne({ id: userId })
+  try {
+    connectToDB()
+    
+    let user = await User.findOne({ id: userId })
         .populate({path: "communities", model: Community})
-    } catch (error: any){
-        throw new Error(`Fallo al encontrar usuario: ${error.message}` )
+    
+    if (!user) {
+      user = await User.findOne({ clerkId: userId })
+        .populate({path: "communities", model: Community})
     }
+    
+    if (!user) {
+      user = await User.findById(userId)
+        .populate({path: "communities", model: Community})
+    }
+    
+    return user
+  } catch (error: any) {
+    throw new Error(`Falló al encontrar usuario: ${error.message}`)
+  }
 }
 
 

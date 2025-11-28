@@ -20,17 +20,13 @@ async function page({params}: {params:Promise<{ id: string }> }) {
     if (!user) return null
    
     const userInfo = await fetchUser(id)
-    
-
-    if (!userInfo.onboarded) redirect('/onboarding')
-    
   
     return (
       <section>
         <div className='m-7'>
           <ProfileHeader
-            accountId={userInfo.id}      // <-- profile being viewed
-            authUserId={user.id}         // <-- current logged-in user
+            accountId={userInfo.id}
+            authUserId={user.id}
             name={userInfo.name}
             username={userInfo.username}
             imgUrl={userInfo.image}
