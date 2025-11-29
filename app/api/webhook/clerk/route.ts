@@ -35,70 +35,58 @@ type Event = {
 }
 
 export const POST = async (request: Request) => {
-  // log entry so we know route is hit
-  console.log('clerk webhook POST received')
-
-  // read raw body (required for signature verification)
-  const rawBody = await request.text()
-  console.log('rawBody length', rawBody.length)
-
-  // get headers
+  const payload = await request.json()
   const header = await headers()
+
   const heads = {
     "svix-id": header.get("svix-id"),
     "svix-timestamp": header.get("svix-timestamp"),
     "svix-signature": header.get("svix-signature"),
   }
-  console.log('svix headers', heads)
 
-  // accept correct env name and your .env typo as fallback while debugging
-  const secret =
-    process.env.NEXT_CLERK_WEBHOOK_SECRET ||
-    process.env.NEXT_CLERK_wEBHOOK_SECRET ||
-    ""
-  if (!secret) {
-    console.error('Missing webhook secret env var NEXT_CLERK_WEBHOOK_SECRET')
-    return NextResponse.json({ message: 'Missing webhook secret' }, { status: 500 })
-  }
-
-  const wh = new Webhook(secret)
+  // Activitate Webhook in the Clerk Dashboard.
+  // After adding the endpoint, you'll see the secret on the right side.
+  const wh = new Webhook(process.env.NEXT_CLERK_WEBHOOK_SECRET || "")
 
   let evnt: Event | null = null
-  try {
-    // verify using rawBody (not JSON.stringify(payload))
-    evnt = wh.verify(rawBody, heads as IncomingHttpHeaders & WebhookRequiredHeaders) as Event
-  } catch (err) {
-    console.error('svix verify failed', err)
-    return NextResponse.json({ message: String(err) }, { status: 400 })
-  }
 
-  console.log('webhook verified', evnt?.type, evnt?.data)
+  try {
+    evnt = wh.verify(
+      JSON.stringify(payload),
+      heads as IncomingHttpHeaders & WebhookRequiredHeaders
+    ) as Event
+  } catch (err) {
+    return NextResponse.json({ message: err }, { status: 400 })
+  }
 
   const eventType: EventType = evnt?.type!
 
   // Listen organization creation event
   if (eventType === "organization.created") {
-    console.log('organization.created payload', evnt?.data)
+    // Resource: https://clerk.com/docs/reference/backend-api/tag/Organizations#operation/CreateOrganization
+    // Show what evnt?.data sends from above resource
+    const { id, name, slug, logo_url, image_url, created_by } =
+      evnt?.data ?? {}
+
     try {
       // @ts-ignore
       await createCommunity(
         // @ts-ignore
-        evnt?.data.id,
-        // @ts-ignore
-        evnt?.data.name,
-        // @ts-ignore
-        evnt?.data.slug,
-        // @ts-ignore
-        evnt?.data.logo_url || evnt?.data.image_url,
+        id,
+        name,
+        slug,
+        logo_url || image_url,
         "org bio",
-        // @ts-ignore
-        evnt?.data.created_by
+        created_by
       )
-      console.log('createCommunity called successfully')
-      return NextResponse.json({ message: "Organization created" }, { status: 201 })
+
+      return NextResponse.json({ message: "User created" }, { status: 201 })
     } catch (err) {
-      console.error('createCommunity error', err)
-      return NextResponse.json({ message: "Internal Server Error" }, { status: 500 })
+      console.log(err)
+      return NextResponse.json(
+        { message: "Internal Server Error" },
+        { status: 500 }
+      )
     }
   }
 
