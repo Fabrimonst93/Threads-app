@@ -41,13 +41,18 @@ export const GET = () => {
   return NextResponse.json({ message: "OK" }, { status: 200, headers: CORS_HEADERS })
 }
 
+// Respond to HEAD requests (no body)
+export const HEAD = () => {
+  return new NextResponse(null, { status: 200, headers: CORS_HEADERS })
+}
+
 // Respond to CORS preflight
 export const OPTIONS = () => {
   return new NextResponse(null, {
     status: 204,
     headers: {
       ...CORS_HEADERS,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "POST, OPTIONS, HEAD, GET",
       "Access-Control-Allow-Headers": "Content-Type, Svix-Id, Svix-Timestamp, Svix-Signature",
     },
   })
