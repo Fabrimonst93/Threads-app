@@ -222,3 +222,7 @@ export const OPTIONS = async () => {
     },
   });
 };
+
+// Add to all handlers
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
