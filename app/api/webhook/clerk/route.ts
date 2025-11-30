@@ -206,3 +206,19 @@ export const POST = async (request: Request) => {
     }
   }
 };
+
+export const GET = async () => {
+  return NextResponse.json({ ok: true }, { status: 200 });
+};
+
+export const OPTIONS = async () => {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
+      "Access-Control-Allow-Headers":
+        "Content-Type, Svix-Id, Svix-Timestamp, Svix-Signature",
+    },
+  });
+};
