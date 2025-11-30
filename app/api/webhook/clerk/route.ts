@@ -34,6 +34,23 @@ type Event = {
   type: EventType
 }
 
+// Simple GET for manual tests / health check
+export const GET = () => {
+  return NextResponse.json({ message: "OK" }, { status: 200, headers: { "Access-Control-Allow-Origin": "*" } })
+}
+
+// Respond to CORS preflight
+export const OPTIONS = () => {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Svix-Id, Svix-Timestamp, Svix-Signature",
+    },
+  })
+}
+
 export const POST = async (request: Request) => {
   const payload = await request.json()
   const header = await headers()
@@ -56,7 +73,10 @@ export const POST = async (request: Request) => {
       heads as IncomingHttpHeaders & WebhookRequiredHeaders
     ) as Event
   } catch (err) {
-    return NextResponse.json({ message: err }, { status: 400 })
+    return NextResponse.json(
+      { message: err },
+      { status: 400, headers: { "Access-Control-Allow-Origin": "*" } }
+    )
   }
 
   const eventType: EventType = evnt?.type!
@@ -194,7 +214,7 @@ export const POST = async (request: Request) => {
 
       return NextResponse.json(
         { message: "Organization deleted" },
-        { status: 201 }
+        { status: 201, headers: { "Access-Control-Allow-Origin": "*" } }
       )
     } catch (err) {
       console.log(err)
