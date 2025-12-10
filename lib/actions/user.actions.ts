@@ -25,9 +25,9 @@ export async function updateUser({
     bio,
     image,
     path
-}: Params
-): Promise<void> {
-    connectToDB()
+  }: Params
+  ): Promise<void> {
+      connectToDB()
 
     
     try {
@@ -55,24 +55,14 @@ export async function updateUser({
 
 export async function fetchUser(userId: string) {
   try {
-    connectToDB()
-    
-    let user = await User.findOne({ id: userId })
-        .populate({path: "communities", model: Community})
-    
-    if (!user) {
-      user = await User.findOne({ clerkId: userId })
-        .populate({path: "communities", model: Community})
-    }
-    
-    if (!user) {
-      user = await User.findById(userId)
-        .populate({path: "communities", model: Community})
-    }
-    
-    return user
+    connectToDB();
+
+    return await User.findOne({ id: userId }).populate({
+      path: "communities",
+      model: Community,
+    });
   } catch (error: any) {
-    throw new Error(`Falló al encontrar usuario: ${error.message}`)
+    throw new Error(`Failed to fetch user: ${error.message}`);
   }
 }
 

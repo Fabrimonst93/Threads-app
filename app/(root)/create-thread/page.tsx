@@ -4,12 +4,11 @@ import { currentUser } from "@clerk/nextjs/server"
 
 async function Page() {
     const user = await currentUser()
-
     if (!user) return null
 
-    const userInfo = fetchUser(user.id)
-    
+    const userInfo = await fetchUser(user.id)
     if (!userInfo) return null
+    
 
     return (
         <div className="m-10">
@@ -17,7 +16,7 @@ async function Page() {
             <h1 className="head-text text-heading2-bold font-bold">
                 Crear Post
             </h1>
-            <PostThread/>
+            <PostThread userId={userInfo._id.toString()}/>
         </div>
     )
 }

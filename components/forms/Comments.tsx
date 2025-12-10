@@ -42,13 +42,13 @@ const router = useRouter()
 
 
   const onSubmit = async (values: z.infer<typeof commentValidation>) => {
-    console.log("Comentario creado exitosamente32")
+
     if (!userId) {
       console.error("User not authenticated")
       return
     }
-
-    await createComment(threadId, values.thread, JSON.stringify(userId), pathname)
+    console
+    await createComment(threadId, values.thread, currentUserId, pathname)
     form.reset()
   }
 

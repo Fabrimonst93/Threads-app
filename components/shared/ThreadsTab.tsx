@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import React from 'react'
 import ThreadCard from '../cards/ThreadCard';
 import { fetchCommunityPosts } from '@/lib/actions/community.actions';
+import Community from '../../lib/models/community.model';
 
 
 interface Props {
@@ -21,7 +22,7 @@ const ThreadsTab = async ({currentUserId, accountId, accountType}: Props) => {
 
     if (!results) redirect('/')
 
-    
+
     return (
         <section className='mt-9 flex flex-col'>
             {results.threads.map((thread: any) => (
@@ -36,7 +37,7 @@ const ThreadsTab = async ({currentUserId, accountId, accountType}: Props) => {
                             ? { name: results.name, image: results.image, id: results.id }
                             : { name: thread.author.name, image: thread.author.image, id: thread.author.id}
                         }
-                    community={thread.community?.id}
+                    community={thread.community}
                     comments={thread.children}
                     createdAt={thread.createdAt}
                     likes={thread.likes}

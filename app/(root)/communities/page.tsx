@@ -11,7 +11,7 @@ import { fetchCommunities } from "@/lib/actions/community.actions"
 async function Page({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined }
+  searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
   const user = await currentUser()
   if (!user) return null
@@ -19,23 +19,26 @@ async function Page({
   const userInfo = await fetchUser(user.id)
   if (!userInfo?.onboarded) redirect("/onboarding")
 
+  // Await searchParams before using
+  const params = await searchParams
+
   const result = await fetchCommunities({
-    searchString: searchParams.q,
-    pageNumber: searchParams?.page ? +searchParams.page : 1,
+    searchString: params.q,
+    pageNumber: params?.page ? +params.page : 1,
     pageSize: 25,
   })
 
   return (
     <>
-      <h1 className='head-text'>Communities</h1>
+      <h1 className='head-text m-5'>Comunidades</h1>
 
       <div className='mt-5'>
         <Searchbar routeType='communities' />
       </div>
 
-      <section className='mt-9 flex flex-wrap gap-4'>
+      <section className='m-9 flex flex-wrap gap-4'>
         {result.communities.length === 0 ? (
-          <p className='no-result'>No Result</p>
+          <p className='no-result'>Sin resultado</p>
         ) : (
           <>
             {result.communities.map((community) => (
@@ -55,7 +58,7 @@ async function Page({
 
       <Pagination
         path='communities'
-        pageNumber={searchParams?.page ? +searchParams.page : 1}
+        pageNumber={params?.page ? +params.page : 1}
         isNext={result.isNext}
       />
     </>

@@ -4,6 +4,9 @@ import React from 'react'
 import PostStats from '../shared/PostStats'
 import Community from '@/lib/models/community.model'
 import { formatDateString } from '@/lib/utils'
+import { Button } from '../ui/button'
+import { userValidation } from '@/lib/validations/user'
+import DeleteButton from '../shared/DeleteButton'
 
 interface props {
     id: string
@@ -41,15 +44,20 @@ const ThreadCard = ({
     community,
     comments,
     createdAt,
-    isComment,
+    isComment = false,
     likes
 } : props
 ) => {
+  const handleDelete = () => {
+        if (!userValidation) return
+    }
+
 
   return (
-    <article className={`flex w-full flex-col rounded-xl ${isComment ? "px-0 xs:px-7" : "bg-dark-2 m-4 mr-10 p-7"
+    
+    <article className={`flex w-auto flex-col rounded-xl ${isComment ? "px-0 xs:px-7" : "bg-dark-2 m-4 mr-10 p-7"
       }`}>
-        <div className='flex items-start justjustify-between'>
+        <div className='flex items-start justify-between'>
             <div className='flex flex-1 w-full flex-row gap-4'>
                 <div className='flex flex-col items-center'>
                     <Link
@@ -62,7 +70,31 @@ const ThreadCard = ({
                             className='rounded-full cursor-pointer'
                         />
                     </Link>
-                    <div className={comments && 'thread-card_bar'}></div>
+                    {comments?.length > 0 && <div className= 'thread-card_bar'/>}
+                    {comments?.length > 0 && (
+                              <div className='flex items-center'>
+                                <Link href={`/thread/${id}`} className='flex items-center'>
+                                
+                                    {comments.slice(0, 3).map((comments, index) => (
+                                    <Image
+                                        key={index}
+                                        src={comments.author.image}
+                                        alt={`user_${index}`}
+                                        width={28}
+                                        height={28}
+                                        className={`${
+                                        index !== 0 && "-ml-4"
+                                        } rounded-full object-cover`}
+                                    />
+                                    ))}
+                                    {comments.length > 3 && (
+                                        <p className='ml-1 text-subtle-medium text-gray-1'>
+                                        +{comments.length-3}
+                                    </p>
+                                    )}
+                                </Link>
+                              </div>
+                            )}
                 </div>
                 <div className=''>
                     <Link
@@ -74,46 +106,47 @@ const ThreadCard = ({
                     <p className='mt-2 text-small-regular text-light-2'>
                         {content}
                     </p>
-                    <div className={`${isComment && "mb-10 "}mt-5 flex flex-col gap-3`}>
 
-                        <PostStats id={id.toString()} likes={likes} userId={currentUserId} comments={comments.length}/>
+                    <PostStats id={id.toString()} likes={likes} userId={currentUserId} comments={comments.length}/>
 
-                        {isComment && comments.length > 0 &&(
-                            <Link
-                                href={`/thread/${id}`}
-                                className='text-small-regular text-light-2 hover:underline'
-                            >
-                                <p className='mt-1 text-subtle-medium text-gray-1'>
-                                    {comments.length} replies
+                    {!isComment && community && (
+                            <div className='mt-5 ml-4 flex items-center'>
+                                <p className='text-subtle-medium text-gray-1 mr-1'>
+                                    {formatDateString(createdAt)}
                                 </p>
-                            </Link>
+
+                                <Link
+                                    href={`/communities/${community.id}`}
+                                    className="flex items-center hover:underline" // SOLUCIÓN: flex + items-center
+                                >
+                                    <span className='text-subtle-medium text-gray-1'>
+                                        - Comunidad: {community.name}
+                                    </span>
+                                    <Image
+                                        src={community.image}
+                                        alt={community.name}
+                                        width={14}
+                                        height={14}
+                                        className='ml-1 rounded-full object-cover'
+                                    />
+                                </Link>
+                            </div>
                         )}
-                    </div>
+                         {/* Si no hay comunidad, solo mostramos la fecha */}
+                        {!isComment && !community && (
+                            <p className='mt-5 text-subtle-medium text-gray-1'>
+                                {formatDateString(createdAt)}
+                            </p>
+                        )}
                 </div>
             </div>
-
-            { /*TDOD: Delete thread*/}
-            { /*TDOD: Delete thread*/}
-
-            {isComment && community && (
-                <Link 
-                    href={`/community/${(community.id)}`}
-                    className='mt-6 flex items center'
-                >
-                    <p className='text-subtle-medium text-gray-1'>
-                        { formatDateString(createdAt) }
-                         - {` Comunidad: ${community.name}`}
-                    </p>
-                    <Image
-                        src={community.image}
-                        alt='Community-name'
-                        width={14}
-                        height={14}
-                        className='ml-1 rounded-full object-cover'
-                    ></Image>
-                </Link>
-                )
-            }
+            {author.id === currentUserId && (
+                <DeleteButton
+                    threadId={JSON.stringify(id)}
+                    currentUserId={currentUserId || ''}
+                    authorId={author.id}              
+                />
+            )}
         </div>
     </article>
   )

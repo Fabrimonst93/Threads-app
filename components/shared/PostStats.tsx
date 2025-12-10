@@ -34,7 +34,7 @@ const PostStats = ({ id, likes, userId, comments }: Props) => {
     }
     
   return (
-    <div className='flex gap-3.5 mt-2'>
+    <div className='flex gap-3.5 mt-4'>
         <div onClick={handleLike} className='flex items-center cursor-pointer'>
             <Image
                 className='cursor-pointer object-contain'

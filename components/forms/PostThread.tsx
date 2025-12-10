@@ -18,19 +18,19 @@ import { createThread } from "@/lib/actions/thread.actions"
 import { z } from "zod"
 import { useAuth } from "@clerk/nextjs"
 import { useOrganization } from "@clerk/nextjs"
-import mongoose from 'mongoose';
-
+import { fetchUser } from "@/lib/actions/user.actions"
 
 
 interface Props {
-  userId: string;
+  userId: string; // Este será el Mongo ID
 }
 
-const PostThread = () => {
+const PostThread = ({ userId }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
-  const { userId } = useAuth()
   const { organization } = useOrganization()
+
+
 
   const form = useForm({
     resolver: zodResolver(threadValidation),
@@ -49,7 +49,8 @@ const PostThread = () => {
       return
     }
 
-      await createThread({
+
+    await createThread({
       text: values.thread,
       author: userId,
       communityId: organization? organization.id : null,

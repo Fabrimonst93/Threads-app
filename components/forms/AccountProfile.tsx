@@ -54,6 +54,7 @@ const AccountProfile = ({ user, btnTitle }: props) => {
     }
   })
 
+
   const handleImage = (e: ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
     e.preventDefault()
 
@@ -215,7 +216,7 @@ const AccountProfile = ({ user, btnTitle }: props) => {
           )}
         />
 
-        <Button type="submit">Aceptar</Button>
+        <Button type="submit" className="bg-dark-4 cursor-pointer">Aceptar</Button>
       </form>
     </Form>
   )

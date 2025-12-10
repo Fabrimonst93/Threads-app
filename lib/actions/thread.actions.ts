@@ -4,7 +4,7 @@ import Thread from "../models/thread.model"
 import { connectToDB } from "../mongoose"
 import User from "../models/user.model"
 import { revalidatePath } from "next/cache"
-import Page from '../../app/(auth)/onboarding/page';
+import Page from '../../app/(auth)/onboarding/page'
 import path from "path"
 import { auth } from "@clerk/nextjs/server"
 import { likePostAdd, LikePostDelete } from "./user.actions"
@@ -23,9 +23,9 @@ export async function createThread({ text, author, communityId, path }: Params) 
   try {
     connectToDB()
 
-    // Find the local user by Clerk ID
-    const localUser = await User.findOne({ clerkId: author })
-    if (!localUser) throw new Error("Local user not found")
+
+    if (!author) throw new Error("Local user not found")
+    
 
     const communityIdObject = await Community.findOne(
       { id: communityId },
@@ -34,17 +34,65 @@ export async function createThread({ text, author, communityId, path }: Params) 
 
     const createdThread = await Thread.create({
       text,
-      author: localUser._id, // Use the local user's ObjectId, not Clerk ID
+      author: author, // Use the local user's ObjectId, not Clerk ID
       community: communityIdObject,
     })
 
-    await User.findByIdAndUpdate(localUser._id, {
+    await User.findByIdAndUpdate(author, {
+      $push: { threads: createdThread._id }
+    })
+
+    await Community.findByIdAndUpdate(communityIdObject?._id, {
       $push: { threads: createdThread._id }
     })
 
     revalidatePath(path)
   } catch (error: any) {
     throw new Error(`Failed to create thread: ${error.message}`)
+  }
+}
+
+export async function deletePost(threadId: string) {
+  try {
+    connectToDB()
+
+    const mainThread = await Thread.findById(threadId).populate("author community")
+
+    if (!mainThread) {
+      throw new Error("Thread no encontrado")
+    }
+
+    await Thread.findByIdAndDelete(threadId)
+
+    await User.updateOne(
+      { _id: mainThread.author._id },
+      { 
+        $pull: { 
+          threads: mainThread._id
+        } 
+      }
+    )
+
+    if (mainThread.community) {
+      await Community.updateOne(
+        { _id: mainThread.community._id },
+        { $pull: { threads: mainThread._id } }
+      )
+    }
+
+    await Thread.deleteMany({ parentId: threadId })
+
+    if (mainThread.parentId) {
+        await Thread.updateOne(
+            { _id: mainThread.parentId },
+            { $pull: { children: mainThread._id } }
+        )
+    }
+
+    alert("Eliminado correctamente")
+
+  } catch (error: any) {
+    throw new Error(`Error al borrar el thread: ${error.message}`)
   }
 }
 
@@ -133,17 +181,20 @@ export async function createComment(
     
     try {
         // Find the local user by Clerk ID
-        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") });
-        if (!localUser) throw new Error("Local user not found");
+        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") })
+        if (!localUser) throw new Error("Local user not found")
+        console.log("Local User:", localUser)
 
         const originalThread = await Thread.findById(threadId)
+        console.log("Original Thread:", originalThread)
         if (!originalThread) throw new Error("Post original no encontrado")
 
         const commentThread = new Thread({
             text: commentText,
-            author: localUser._id, // Use the local user's ObjectId
+            author: userId, // Use the local user's ObjectId
             parentId: threadId,
         })
+        console.log("Creating comment:", commentThread)
         
         const savedComment = await commentThread.save()
         
@@ -153,6 +204,7 @@ export async function createComment(
         revalidatePath(path)
     }
     catch (error: any) {
+        console.log("Local User:", userId)
         throw new Error(`Error al crear comentario: ${error.message}`)
     }
 }
@@ -165,8 +217,8 @@ export async function likePost(
 
     try {
         // Find the local user by Clerk ID
-        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") });
-        if (!localUser) throw new Error("Local user not found");
+        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") })
+        if (!localUser) throw new Error("Local user not found")
 
 
         const thread = await Thread.findById(threadId)
@@ -191,8 +243,8 @@ export async function unlikePost(
 
     try {
         // Find the local user by Clerk ID
-        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") });
-        if (!localUser) throw new Error("Local user not found");
+        const localUser = await User.findOne({ clerkId: userId.replace(/"/g, "") })
+        if (!localUser) throw new Error("Local user not found")
 
         const thread = await Thread.findById(threadId)
         if (!thread) throw new Error("Post original no encontrado") 

@@ -7,6 +7,7 @@ import Thread from "../models/thread.model"
 import User from "../models/user.model"
 
 import { connectToDB } from "../mongoose"
+import { commentValidation } from "../validations/thread"
 
 export async function createCommunity(
   id: string,
@@ -91,7 +92,10 @@ export async function fetchCommunityPosts(id: string) {
             model: User,
             select: "image _id", // Select the "name" and "_id" fields from the "User" model
           },
-        },
+        },{
+            path: "community",
+            model: Community
+        }
       ],
     })
 

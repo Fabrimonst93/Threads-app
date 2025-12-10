@@ -18,7 +18,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
 
     const thread = await fetchThreadById(id)
     if (!thread) return null;
-    
+
     return (
         <section className='relative'>
             <div>
@@ -29,7 +29,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
                     parentId={thread.parentId}
                     content={thread.text}
                     author={thread.author}
-                    communityId={thread.communityId}
+                    community={thread.community}
                     createdAt={thread.createdAt}
                     comments={thread.children}
                     likes={thread.likes}
@@ -40,7 +40,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
                 <Comment
                     threadId = {thread._id.toString()}
                     currentUserImg={userInfo.image}
-                    currentUserId={JSON.stringify(userInfo._id)}
+                    currentUserId={JSON.parse(JSON.stringify(userInfo._id))}
                 />
             </div>
 
@@ -53,7 +53,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
                         parentId={childItem.parentId}
                         content={childItem.text}
                         author={childItem.author}
-                        communityId={childItem.communityId}
+                        community={childItem.communityId}
                         createdAt={childItem.createdAt}
                         comments={childItem.children}
                         likes={childItem.likes}
@@ -61,10 +61,6 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
                     />
                 ))}
             </div>
-
-            <h2>{thread.text}</h2>
-            <p>Author: {thread.author.name}</p>
-
         </section>
   )
 }

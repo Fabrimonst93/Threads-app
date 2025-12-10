@@ -12,16 +12,21 @@ const LeftsideBar = () => {
   const router = useRouter()
   const pathname = usePathname()
 
-  const { userId } = useAuth();
-
+  const { userId } = useAuth()
+  
   return (
     <section className='custom-scrollbar leftsidebar'>
       <div className='flex flex-col w-full flex-1 gap-6 px-6 pt-6'>
         {sidebarLinks.map((link)=> {
           const isActive = (pathname.includes(link.route) && link.route.length > 1 ) || pathname === link.route;
-
-          if (link.route === "/profile") link.route = `${link.route}/${userId}`
-          
+          if (link.route === "/profile") {
+              if (userId) {
+                  link.route = `/profile/${userId}`
+              } else {
+                  // Optional: If no user, prevent link or redirect to sign-in
+                  return null; 
+              }
+          }
           return (
             <Link 
               href={link.route}

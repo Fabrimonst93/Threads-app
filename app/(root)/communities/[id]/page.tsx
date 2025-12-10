@@ -14,10 +14,12 @@ async function Page({ params }: { params: { id: string } }) {
   const user = await currentUser();
   if (!user) return null;
 
+  
   const communityDetails = await fetchCommunityDetails(params.id)
 
+
   return (
-    <section>
+    <section className='m-9'>
       <ProfileHeader
         accountId={communityDetails.createdBy.id}
         authUserId={user.id}
@@ -26,7 +28,7 @@ async function Page({ params }: { params: { id: string } }) {
         imgUrl={communityDetails.image}
         bio={communityDetails.bio}
         type='Community'
-      />
+      /> 
 
       <div className='mt-9'>
         <Tabs defaultValue='threads' className='w-full'>
@@ -55,7 +57,7 @@ async function Page({ params }: { params: { id: string } }) {
             {/* @ts-ignore */}
             <ThreadsTab
               currentUserId={user.id}
-              accountId={communityDetails._id}
+              accountId={communityDetails}
               accountType='Community'
             />
           </TabsContent>
@@ -63,25 +65,19 @@ async function Page({ params }: { params: { id: string } }) {
           <TabsContent value='members' className='mt-9 w-full text-light-1'>
             <section className='mt-9 flex flex-col gap-10'>
               {communityDetails.members.map((member: any) => (
-                <UserCard
-                  key={member.id}
-                  id={member.id}
-                  name={member.name}
-                  username={member.username}
-                  imgUrl={member.image}
-                  personType='User'
-                />
+                <div key={member.id} className='w-full bg-dark-3 p-4 rounded-lg'>
+                  <UserCard
+                    key={member.id}
+                    id={member.id}
+                    name={member.name}
+                    username={member.username}
+                    imgUrl={member.image}
+                    personType='User'
+                  />
+
+                </div>
               ))}
             </section>
-          </TabsContent>
-
-          <TabsContent value='requests' className='w-full text-light-1'>
-            {/* @ts-ignore */}
-            <ThreadsTab
-              currentUserId={user.id}
-              accountId={communityDetails._id}
-              accountType='Community'
-            />
           </TabsContent>
         </Tabs>
       </div>

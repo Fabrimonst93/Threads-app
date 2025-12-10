@@ -1,5 +1,7 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react'
+import { Button } from '../ui/button';
 
 
 
@@ -35,10 +37,9 @@ const ProfileHeader = (
                             src={imgUrl}
                             alt='profile image'
                             fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className='rounded-full object-cover'
-                        >
-
-                        </Image>
+                        />
                     </div>
 
                     <div className='flex-1'>
@@ -46,6 +47,18 @@ const ProfileHeader = (
                         <p className='text-base-medium text-light-3'>@{username}</p>
                     </div>
                 </div>
+
+                <Link href={`/profile/edit`}>
+                    <Button size='sm' className='h-12 community-card_btn hover:bg-dark-4 hover:cursor-pointer'>
+                        <Image
+                            src="/edit.svg"
+                            alt='edit'
+                            width={24}
+                            height={24}
+                        />
+                    </Button>
+                </Link>
+                
             </div>
 
             <p className='mt-6 max-w-lg text-base-regular text-light-2'>{bio}</p>
