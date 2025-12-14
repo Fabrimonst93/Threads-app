@@ -23,6 +23,7 @@ import { UseUploadthingProps } from "@uploadthing/react"
 import { useUploadThing } from "@/lib/uploadthing"
 import { updateUser } from "@/lib/actions/user.actions"
 import { usePathname, useRouter } from "next/navigation"
+import { updateCommunityInfo } from "@/lib/actions/community.actions"
 
 
 interface props {
@@ -34,10 +35,11 @@ interface props {
         bio: string 
         image: string
     }
-    btnTitle: string
+    type: "profile" | "community"
+    communityId?: string
 }
 
-const AccountProfile = ({ user, btnTitle }: props) => {
+const AccountProfile = ({ user, type, communityId }: props) => {
 
   const router = useRouter()
   const pathname = usePathname()
@@ -92,27 +94,36 @@ const AccountProfile = ({ user, btnTitle }: props) => {
       }
     }
 
-    await updateUser({
-      userId: user.id,
-      username: values.username,
-      name: values.name,
-      bio: values.bio,
-      image: values.profile_photo,
-      path: pathname 
-    })
+    if (type === "community"){
+      await updateCommunityInfo(
+        user.id,
+        values.name,
+        values.username,
+        values.profile_photo,
+        values.bio
+      )
+      } else {
+      await updateUser({
+        userId: user.id,
+        username: values.username,
+        name: values.name,
+        bio: values.bio,
+        image: values.profile_photo,
+        path: pathname 
+      })
+    }
 
 
     if (pathname === "/profile/edit"){
       router.back()
+    } else if (type === "community"){
+      router.push(`/communities/${communityId}`)
     } else {
       router.push("/")
     }
   }
 
-
-
   return (
-    
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="flex flex-col justify-start gap-10">
         <FormField

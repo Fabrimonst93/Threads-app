@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { profileTabs } from '@/constants';
 import Image from 'next/image';
 import ThreadsTab from '@/components/shared/ThreadsTab';
+import UserCard from '@/components/cards/UserCard';
 
 
 async function page({params}: {params:Promise<{ id: string }> }) {
@@ -25,7 +26,7 @@ async function page({params}: {params:Promise<{ id: string }> }) {
       <section>
         <div className='m-7'>
           <ProfileHeader
-            accountId={userInfo.id}
+            authorId={userInfo.id}
             authUserId={user.id}
             name={userInfo.name}
             username={userInfo.username}
@@ -54,16 +55,21 @@ async function page({params}: {params:Promise<{ id: string }> }) {
                   </TabsTrigger>
                 ))}
               </TabsList>
-              {profileTabs.map((tab) => (
-                <TabsContent key={`content-${tab.label}`} value={tab.value} className='w-full text-light-1'>
-                  <ThreadsTab
-                    currentUserId={user.id}
-                    accountId={userInfo.id}
-                    accountType="User"
-                  >
-                  </ThreadsTab>
-                </TabsContent>
-                ))}
+
+              <TabsContent value='threads' className='w-full text-light-1'>
+                <ThreadsTab
+                  currentUserId={user.id}
+                  accountId={userInfo.id}
+                  accountType="User"
+                >
+                </ThreadsTab>
+              </TabsContent>
+              
+              <TabsContent value='communities' className='w-full text-light-1'>
+                <div className='mt-7 flex w-[350px] flex-col gap-9'>
+                  
+                </div>
+              </TabsContent>  
             </Tabs>
           </div>
         </div>

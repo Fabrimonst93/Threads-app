@@ -11,28 +11,30 @@ import { fetchCommunityDetails } from "@/lib/actions/community.actions"
 import { currentUser } from "@clerk/nextjs/server"
 
 async function Page({ params }: { params: { id: string } }) {
-  const user = await currentUser();
-  if (!user) return null;
+  const { id } = await params
+  const user = await currentUser()
+  if (!user) return null
 
   
-  const communityDetails = await fetchCommunityDetails(params.id)
-
+  const communityDetails = await fetchCommunityDetails(id)
 
   return (
     <section className='m-9'>
       <ProfileHeader
-        accountId={communityDetails.createdBy.id}
+        authorId={communityDetails.createdBy.id}
         authUserId={user.id}
         name={communityDetails.name}
         username={communityDetails.username}
         imgUrl={communityDetails.image}
         bio={communityDetails.bio}
+        communityId={id}
+        members={communityDetails.members}
         type='Community'
       /> 
 
-      <div className='mt-9'>
-        <Tabs defaultValue='threads' className='w-full'>
-          <TabsList className='tab'>
+      <div className='mt-9 w-full'>
+        <Tabs defaultValue='threads' >
+          <TabsList className='tab w-full'>
             {communityTabs.map((tab) => (
               <TabsTrigger key={tab.label} value={tab.value} className='tab'>
                 <Image
@@ -62,8 +64,8 @@ async function Page({ params }: { params: { id: string } }) {
             />
           </TabsContent>
 
-          <TabsContent value='members' className='mt-9 w-full text-light-1'>
-            <section className='mt-9 flex flex-col gap-10'>
+          <TabsContent value='miembros' className='w-full text-light-1'>
+            <section className='mt-6 flex flex-col gap-3'>
               {communityDetails.members.map((member: any) => (
                 <div key={member.id} className='w-full bg-dark-3 p-4 rounded-lg'>
                   <UserCard

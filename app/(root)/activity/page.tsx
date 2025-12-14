@@ -18,13 +18,12 @@ async function Page() {
   return (
     <>
       <h1 className='text-heading2-bold text-light-1 mb-10 m-7'>Actividad</h1>
-
-      <section className='mt-10 flex flex-col gap-5 m-7'>
+      <section className='mt-8 flex flex-col gap-5 m-7'>
         {activity.length > 0 ? (
           <>
-            {activity.map((activity) => (
+                      {activity.map((activity) => (
               <Link key={activity._id} href={`/thread/${activity.parentId}`}>
-                <article className='activity-card'>
+                <article className='activity-card p-4'>
                   <Image
                     src={activity.author.image}
                     alt='user_logo'

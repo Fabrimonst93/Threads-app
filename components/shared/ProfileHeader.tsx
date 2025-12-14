@@ -1,32 +1,38 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
-import { Button } from '../ui/button';
-
+import { Button } from '../ui/button'
+import CommunityButtons from './CommunityButtons'
 
 
 interface Props {
-  accountId: string;
-  authUserId: string;
-  name: string;
-  username: string;
-  imgUrl: string;
-  bio: string;
-  type: "User" | "Community";
+  authorId: string
+  authUserId: string
+  name: string
+  username: string
+  imgUrl: string
+  bio: string
+  type: "User" | "Community"
+  communityId?: string
+  members?: any[]
   }
 
 const ProfileHeader = (
-    {accountId,
+    {authorId,
     authUserId,
     name,
     username,
     imgUrl,
     bio,
-    type
+    type,
+    communityId,
+    members
 }: Props
 ) => {
-
-
+    
+    const isMember = members?.some(
+        (member: any) => member.id === authUserId
+    )
 
     return (
         <div className='flex w-full flex-col justify-start'>
@@ -48,17 +54,28 @@ const ProfileHeader = (
                     </div>
                 </div>
 
-                <Link href={`/profile/edit`}>
-                    <Button size='sm' className='h-12 community-card_btn hover:bg-dark-4 hover:cursor-pointer'>
-                        <Image
-                            src="/edit.svg"
-                            alt='edit'
-                            width={24}
-                            height={24}
-                        />
-                    </Button>
-                </Link>
-                
+                {type === 'Community' && communityId &&(
+                    <CommunityButtons
+                        authorId={authorId}
+                        authUserId={authUserId}
+                        communityId={communityId}
+                        isMember={isMember}
+                    />
+                )}
+
+                {authorId === authUserId && type === "User" &&(
+                    <Link href={`/profile/edit`}>
+                        <Button size='sm' className='h-12 community-card_btn hover:bg-dark-4 hover:cursor-pointer'>
+                            Editar
+                            <Image
+                                src="/edit.svg"
+                                alt='edit'
+                                width={16}
+                            height={16}
+                            />
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             <p className='mt-6 max-w-lg text-base-regular text-light-2'>{bio}</p>

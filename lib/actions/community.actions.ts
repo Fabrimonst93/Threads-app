@@ -166,48 +166,45 @@ export async function fetchCommunities({
 export async function addMemberToCommunity(
   communityId: string,
   memberId: string
-) {
+)   {
   try {
     connectToDB()
 
-    // Find the community by its unique id
     const community = await Community.findOne({ id: communityId })
 
     if (!community) {
       throw new Error("Community not found")
     }
 
-    // Find the user by their unique id
     const user = await User.findOne({ id: memberId })
 
     if (!user) {
       throw new Error("User not found")
     }
 
-    // Check if the user is already a member of the community
-    if (community.members.includes(user._id)) {
+    if (community.members?.includes(user._id)) {
       throw new Error("User is already a member of the community")
     }
 
-    // Add the user's _id to the members array in the community
-    community.members.push(user._id)
-    await community.save()
+    await Community.findOneAndUpdate(
+      { id: communityId },
+      { $push: { members: user._id } }
+    )
+    await User.findOneAndUpdate(
+      { id: memberId },
+      { $push: { communities: community._id } }
+    )
 
-    // Add the community's _id to the communities array in the user
-    user.communities.push(community._id)
-    await user.save()
-
-    return community
-  } catch (error) {
-    // Handle any errors
-    console.error("Error adding member to community:", error)
-    throw error
+    } catch (error) {
+      console.error("Error adding member to community:", error)
+      throw error
   }
 }
+    
 
 export async function removeUserFromCommunity(
-  userId: string,
-  communityId: string
+  communityId: string,
+  userId: string
 ) {
   try {
     connectToDB()
@@ -226,13 +223,11 @@ export async function removeUserFromCommunity(
       throw new Error("Community not found")
     }
 
-    // Remove the user's _id from the members array in the community
     await Community.updateOne(
       { _id: communityIdObject._id },
       { $pull: { members: userIdObject._id } }
     )
 
-    // Remove the community's _id from the communities array in the user
     await User.updateOne(
       { _id: userIdObject._id },
       { $pull: { communities: communityIdObject._id } }
@@ -240,7 +235,6 @@ export async function removeUserFromCommunity(
 
     return { success: true }
   } catch (error) {
-    // Handle any errors
     console.error("Error removing user from community:", error)
     throw error
   }
@@ -250,24 +244,22 @@ export async function updateCommunityInfo(
   communityId: string,
   name: string,
   username: string,
-  image: string
+  image: string,
+  bio: string
 ) {
   try {
     connectToDB()
 
-    // Find the community by its _id and update the information
     const updatedCommunity = await Community.findOneAndUpdate(
       { id: communityId },
-      { name, username, image }
+      { name, username, image, bio }
     )
 
     if (!updatedCommunity) {
       throw new Error("Community not found")
     }
 
-    return updatedCommunity
   } catch (error) {
-    // Handle any errors
     console.error("Error updating community information:", error)
     throw error
   }
@@ -277,7 +269,6 @@ export async function deleteCommunity(communityId: string) {
   try {
     connectToDB()
 
-    // Find the community by its ID and delete it
     const deletedCommunity = await Community.findOneAndDelete({
       id: communityId,
     })
@@ -286,13 +277,10 @@ export async function deleteCommunity(communityId: string) {
       throw new Error("Community not found")
     }
 
-    // Delete all threads associated with the community
     await Thread.deleteMany({ community: communityId })
 
-    // Find all users who are part of the community
     const communityUsers = await User.find({ communities: communityId })
 
-    // Remove the community from the 'communities' array for each user
     const updateUserPromises = communityUsers.map((user) => {
       user.communities.pull(communityId)
       return user.save()
