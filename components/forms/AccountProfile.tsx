@@ -96,7 +96,7 @@ const AccountProfile = ({ user, type, communityId }: props) => {
 
     if (type === "community"){
       await updateCommunityInfo(
-        user.id,
+        communityId as string,
         values.name,
         values.username,
         values.profile_photo,
@@ -122,8 +122,11 @@ const AccountProfile = ({ user, type, communityId }: props) => {
       router.push("/")
     }
   }
-
-  return (
+  console.log("user: ", user)
+  console.log("coomunityId: ", communityId)
+    
+    
+    return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="flex flex-col justify-start gap-10">
         <FormField

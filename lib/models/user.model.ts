@@ -34,10 +34,12 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: false
     },
-    communities: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Community'
-    },
+    communities: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Community",
+        },
+    ],
     likes: [{
         type: String,
         required: true

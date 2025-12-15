@@ -16,13 +16,13 @@ import {
 import { usePathname, useRouter } from "next/navigation"
 import { createThread } from "@/lib/actions/thread.actions"
 import { z } from "zod"
-import { useAuth } from "@clerk/nextjs"
 import { useOrganization } from "@clerk/nextjs"
-import { fetchUser } from "@/lib/actions/user.actions"
+import Community from '@/lib/models/community.model';
 
 
 interface Props {
   userId: string; // Este será el Mongo ID
+  communityId?: string;
 }
 
 const PostThread = ({ userId }: Props) => {
@@ -36,10 +36,10 @@ const PostThread = ({ userId }: Props) => {
     resolver: zodResolver(threadValidation),
     defaultValues: {
       thread: "",
-      accountId: userId || ""
+      accountId: userId || "",
+      communityId: ""
     }
   })
-
 
 
   const onSubmit = async (values: z.infer<typeof threadValidation>) => {
@@ -85,6 +85,21 @@ const PostThread = ({ userId }: Props) => {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name='communityId'
+          render={({ field }) => (
+            <FormItem className='flex w-full flex-col gap-3'>
+              <FormLabel className='text-base-semibold text-light-2'>
+                Comunidad
+              </FormLabel>
+              <FormControl className='no-focus border border-dark-4 bg-dark-3 text-light-1'>
+                
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type='submit' className='bg-primary-500'>
           Publicar
         </Button>

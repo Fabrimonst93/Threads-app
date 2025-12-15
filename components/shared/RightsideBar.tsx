@@ -17,13 +17,13 @@ async function RightSidebar() {
   const suggestedCOmmunities = await fetchCommunities({ pageSize: 4 })
 
   return (
-    <section className='custom-scrollbar rightsidebar p-6'>
+    <section className='custom-scrollbar rightsidebar w-[300px] p-6'>
       <div className='flex flex-1 flex-col justify-start'>
         <h3 className='text-heading4-medium underline underline-offset-2 decoration-1 text-light-1'>
           Comunidades Sugeridas
         </h3>
 
-        <div className='mt-7 flex w-[350px] flex-col gap-9'>
+        <div className='mt-7 flex w-[250px] flex-col gap-9'>
           {suggestedCOmmunities.communities.length > 0 ? (
             <>
               {suggestedCOmmunities.communities.map((community) => (
@@ -47,7 +47,7 @@ async function RightSidebar() {
 
       <div className='flex flex-1 flex-col justify-start'>
         <h3 className='text-heading4-medium text-light-1  underline underline-offset-2 decoration-1'>Otras personas</h3>
-        <div className='mt-7 flex w-[350px] flex-col gap-10'>
+        <div className='mt-7 flex w-[250px] flex-col gap-10'>
           {similarMinds.users.length > 0 ? (
             <>
               {similarMinds.users.map((person) => (

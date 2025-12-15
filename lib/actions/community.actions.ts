@@ -34,13 +34,15 @@ export async function createCommunity(
       image,
       bio,
       createdBy: user._id, // Use the mongoose ID of the user
+      members: [user._id]
     })
 
     const createdCommunity = await newCommunity.save()
 
-    // Update User model
-    user.communities.push(createdCommunity._id)
-    await user.save()
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { $push: { communities: newCommunity._id } }
+    )
 
     return createdCommunity
   } catch (error) {

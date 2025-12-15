@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import Thread from "../models/thread.model"
 import { FilterQuery, SortOrder } from "mongoose"
 import Community from "../models/community.model"
+import path from 'path';
 
 
 interface Params {
@@ -57,7 +58,12 @@ export async function fetchUser(userId: string) {
   try {
     connectToDB()
 
-    return await User.findOne({ id: userId }).populate({
+    return await User.findOne({ id: userId })
+    .populate({
+      path: "threads",
+      model: Thread,
+    })
+    .populate({
       path: "communities",
       model: Community,
     })

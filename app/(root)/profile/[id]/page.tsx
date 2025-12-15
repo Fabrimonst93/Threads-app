@@ -1,16 +1,13 @@
 import React from 'react'
-import ThreadCard from '@/components/cards/ThreadCard';
-import Comment from '@/components/forms/Comments';
-import { fetchThreadById } from '@/lib/actions/thread.actions';
-import { fetchUser } from '@/lib/actions/user.actions';
-import { currentUser } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import ProfileHeader from '@/components/shared/ProfileHeader';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { profileTabs } from '@/constants';
-import Image from 'next/image';
-import ThreadsTab from '@/components/shared/ThreadsTab';
-import UserCard from '@/components/cards/UserCard';
+import { fetchUser } from '@/lib/actions/user.actions'
+import { currentUser } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import ProfileHeader from '@/components/shared/ProfileHeader'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { profileTabs } from '@/constants'
+import Image from 'next/image'
+import ThreadsTab from '@/components/shared/ThreadsTab'
+import UserCard from '@/components/cards/UserCard'
 
 
 async function page({params}: {params:Promise<{ id: string }> }) {
@@ -66,8 +63,27 @@ async function page({params}: {params:Promise<{ id: string }> }) {
               </TabsContent>
               
               <TabsContent value='communities' className='w-full text-light-1'>
-                <div className='mt-7 flex w-[350px] flex-col gap-9'>
-                  
+                <div className='mt-7 flex flex-col gap-4'>
+                  {userInfo.communities.length > 0 ? (
+                    <>
+                      {userInfo.communities.map((community: any) => (
+                        <article className='w-1/1 mx-5 p-5 bg-dark-3 rounded-2xl' key={community.id}>
+                          <UserCard
+                            key={community.id}
+                            id={community.id}
+                            name={community.name}
+                            username={community.username}
+                            imgUrl={community.image}
+                            personType='Community'
+                          />
+                        </article>
+                      ))}
+                    </>
+                  ) : (
+                    <p className='!text-base-regular text-light-3'>
+                      No hay comunidades que mostrar
+                    </p>
+                  )}
                 </div>
               </TabsContent>  
             </Tabs>

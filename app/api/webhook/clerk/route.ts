@@ -73,6 +73,7 @@ export const POST = async (request: Request) => {
       const { id, name, slug, logo_url, image_url, created_by } =
         evnt?.data ?? {}
 
+        console.log("Organization items: ", evnt?.data)
       try {
         // @ts-ignore
         await createCommunity(
@@ -84,6 +85,7 @@ export const POST = async (request: Request) => {
           "org bio",
           created_by
         )
+        console.log("Organization items: ", evnt?.data)
 
         // respond 200 OK (Svix/Clerk only requires a 2xx)
         return NextResponse.json({ ok: true }, { status: 200 })
