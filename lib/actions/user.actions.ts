@@ -210,3 +210,30 @@ export async function LikePostDelete(userId: string, postId: string) {
     throw error
   }
 }
+
+export async function fetchUserCommunities(userId: string) {
+  try {
+    connectToDB();
+
+    const user = await User.findOne({ _id: userId })
+      .populate({
+        path: "communities",
+        model: Community,
+      });
+
+    if (!user) {
+      return [];
+    }
+
+
+    const communities = user.communities.map((community: any) => ({
+      id: community.id,
+      name: community.name,
+      image: community.image
+    }));
+
+    return communities;
+  } catch (error: any) {
+    throw new Error(`Failed to fetch user communities: ${error.message}`);
+  }
+}
